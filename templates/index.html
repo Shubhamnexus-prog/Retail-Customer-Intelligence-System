@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Customer Segmentation Intelligence System</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            color: #182230;
+        }
+
+        header {
+            background: #14213d;
+            color: white;
+            padding: 28px 5%;
+        }
+
+        header h1 {
+            margin: 0 0 8px;
+            font-size: 26px;
+        }
+
+        header p {
+            margin: 0;
+            color: #d5deef;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 28px auto;
+            padding: 0 18px;
+        }
+
+        .card {
+            background: white;
+            padding: 22px;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            box-shadow: 0 3px 14px #172b4d0d;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 16px;
+            align-items: end;
+            flex-wrap: wrap;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        input,
+        select,
+        button {
+            padding: 11px;
+            border: 1px solid #ccd4e0;
+            border-radius: 7px;
+            font-size: 14px;
+        }
+
+        input[type="file"] {
+            max-width: 100%;
+            background: #fff;
+        }
+
+        button,
+        .download {
+            background: #2457d6;
+            color: white;
+            border: 0;
+            text-decoration: none;
+            padding: 12px 17px;
+            border-radius: 7px;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        button:hover,
+        .download:hover {
+            background: #173fa8;
+        }
+
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 14px;
+        }
+
+        .metric {
+            border-left: 4px solid #2457d6;
+        }
+
+        .metric small {
+            color: #667085;
+        }
+
+        .metric h2 {
+            margin: 10px 0 0;
+            font-size: 25px;
+            overflow-wrap: anywhere;
+        }
+
+        .error {
+            background: #fff0f0;
+            color: #a11;
+            padding: 14px;
+            border-radius: 8px;
+            overflow-wrap: anywhere;
+        }
+
+        .success {
+            background: #eaf8ef;
+            color: #176534;
+            padding: 14px;
+            border-radius: 8px;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 11px;
+            border-bottom: 1px solid #e6eaf0;
+            white-space: nowrap;
+        }
+
+        th {
+            background: #f0f4fa;
+        }
+
+        .muted {
+            color: #667085;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        footer {
+            text-align: center;
+            padding: 24px;
+            color: #667085;
+        }
+
+        @media (max-width: 600px) {
+            header {
+                padding: 22px 18px;
+            }
+
+            header h1 {
+                font-size: 22px;
+            }
+
+            main {
+                margin-top: 18px;
+                padding: 0 12px;
+            }
+
+            .card {
+                padding: 16px;
+            }
+
+            .form-row>div {
+                width: 100%;
+            }
+
+            input[type="file"],
+            select {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>Customer Segmentation Intelligence System</h1>
+        <p>Real retail transactions · RFM analytics · Machine learning</p>
+    </header>
+
+    <main>
+
+        <!-- Dataset Upload and Configuration -->
+        <section class="card">
+            <h2>Analyze Customer Behavior</h2>
+
+            <p class="muted">
+                Upload the UCI Online Retail Excel/CSV file, or leave
+                the upload empty to use data/Online Retail.xlsx.
+            </p>
+
+            <form method="POST" action="/" enctype="multipart/form-data">
+                <div class="form-row">
+
+                    <div>
+                        <label for="dataset">Retail Dataset (optional)</label>
+
+                        <input type="file" id="dataset" name="dataset" accept=".xlsx,.xls,.csv">
+                    </div>
+
+                    <div>
+                        <label for="clusters">Number of Clusters</label>
+
+                        <select id="clusters" name="clusters">
+                            {% for k in range(2, 11) %}
+                            <option value="{{ k }}" {% if selected_clusters|int==k %}selected{% endif %}>
+                                {{ k }} clusters
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <button type="submit">Run Segmentation</button>
+
+                </div>
+            </form>
+
+            <p class="muted">
+                Required columns: InvoiceNo, Quantity, InvoiceDate,
+                UnitPrice, CustomerID.
+            </p>
+        </section>
+
+        <!-- Error Message -->
+        {% if error %}
+        <section class="card error">
+            <strong>Could not analyze the dataset:</strong>
+            {{ error }}
+        </section>
+        {% endif %}
+
+        {% if summary %}
+
+        <!-- Summary Metrics -->
+        <section class="metrics">
+
+            <div class="card metric">
+                <small>Valid Transaction Rows</small>
+                <h2>{{ "{:,}".format(summary.transactions|int) }}</h2>
+            </div>
+
+            <div class="card metric">
+                <small>Identified Customers</small>
+                <h2>{{ "{:,}".format(summary.customers|int) }}</h2>
+            </div>
+
+            <div class="card metric">
+                <small>Positive Sales Total</small>
+                <h2>£{{ "{:,.2f}".format(summary.revenue|float) }}</h2>
+            </div>
+
+            <div class="card metric">
+                <small>Clusters Generated</small>
+                <h2>{{ summary.clusters }}</h2>
+            </div>
+
+            <div class="card metric">
+                <small>Silhouette Score</small>
+                <h2>
+                    {% if summary.silhouette is not none %}
+                    {{ "%.3f"|format(summary.silhouette|float) }}
+                    {% else %}
+                    N/A
+                    {% endif %}
+                </h2>
+            </div>
+
+        </section>
+
+        <!-- Cluster Visualization -->
+        <section class="card">
+            <h2>Customer Cluster Visualization</h2>
+
+            <p class="muted">
+                Each point represents one customer. Cluster numbers
+                are model labels, not a ranking of customer quality.
+            </p>
+
+            {% if plot_html %}
+            {{ plot_html|safe }}
+            {% else %}
+            <p class="muted">No visualization is available.</p>
+            {% endif %}
+        </section>
+
+        <!-- Customer Segment Profiles -->
+        <section class="card">
+            <h2>Customer Segment Profiles</h2>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Segment</th>
+                            <th>Customers</th>
+                            <th>Average Recency (days)</th>
+                            <th>Average Order Frequency</th>
+                            <th>Average Total Spend (£)</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for row in profiles %}
+                        <tr>
+                            <td>{{ row.get('Segment', 'Unknown') }}</td>
+                            <td>{{ row.get('CustomerCount', 0) }}</td>
+                            <td>{{ "%.2f"|format(row.get('Recency', 0)|float) }}</td>
+                            <td>{{ "%.2f"|format(row.get('Frequency', 0)|float) }}</td>
+                            <td>{{ "%.2f"|format(row.get('Monetary', 0)|float) }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5">No customer profiles available.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Customer-Level Results -->
+        <section class="card">
+            <h2>Customer-Level Results Preview</h2>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Customer ID</th>
+                            <th>Recency</th>
+                            <th>Frequency</th>
+                            <th>Monetary (£)</th>
+                            <th>Cluster</th>
+                            <th>Segment</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for row in preview %}
+                        <tr>
+                            <td>{{ row.get('CustomerID', 'N/A') }}</td>
+                            <td>{{ row.get('Recency', 0) }}</td>
+                            <td>{{ row.get('Frequency', 0) }}</td>
+                            <td>{{ "%.2f"|format(row.get('Monetary', 0)|float) }}</td>
+                            <td>{{ row.get('Cluster', 'N/A') }}</td>
+                            <td>{{ row.get('Segment', 'Unknown') }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6">No customer results available.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <p>
+                <a class="download" href="{{ url_for('download_results') }}">
+                    Download All Customer Segments (CSV)
+                </a>
+            </p>
+        </section>
+
+        {% endif %}
+
+    </main>
+
+    <footer>
+        @ 2026 Customer Segmentation Intelligence System ·
+    </footer>
+
+</body>
+
+</html>
