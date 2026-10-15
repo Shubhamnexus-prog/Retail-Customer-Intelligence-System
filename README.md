@@ -163,16 +163,11 @@ openpyxl
 ```
 
 ---
+<img width="1920" height="1080" alt="Screenshot (213)" src="https://github.com/user-attachments/assets/880523ab-851b-4cbc-ac6c-f419ef43573e" />
+<img width="1920" height="1080" alt="Screenshot (214)" src="https://github.com/user-attachments/assets/0c56e1cd-9bda-4333-a9d3-0906de8e0341" />
+<img width="1920" height="1080" alt="Screenshot (215)" src="https://github.com/user-attachments/assets/a091fb00-8c74-493f-8b8b-77f987cdd309" />
 
-## Segment Labels
 
-| Segment | Meaning |
-|---|---|
-| High-value loyal | Frequent, high spend, recent buyers |
-| Previously valuable | Frequent, high spend, but not recent |
-| Needs re-engagement | Frequent buyers who have gone quiet |
-| Recent / developing | Recent buyers with low frequency |
-| Low-frequency / low-spend | Infrequent, low-value customers |
 
 ---
 
